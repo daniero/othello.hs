@@ -18,10 +18,14 @@ data Player = Player1
             | Player2
             deriving (Eq, Show)
 
+color Player1 = Black
+color Player2 = White
+
 data GameState = GameOver { board :: Board }
                | Continue { board :: Board, nextPlayer :: Player }
                deriving (Eq, Show)
 
+data Move = Move { tile :: Tile, x :: Int, y :: Int }
 
 --
 -- Helper functions
@@ -71,8 +75,25 @@ neighbourCoords boardSize (x, y) =
   |> filter (\(i, j) -> i >= 0 && i < boardSize && j >= 0 && j < boardSize)
 
 
-move :: Board -> Board
-move board = board
+-- TODO
+legalMove :: Board -> Move -> Bool
+legalMove _ _ = True
+
+-- TODO find which tiles can be flipped from the given move
+findFlippable :: Board -> Int -> Int -> Tile -> Board
+findFlippable board _ _ _ = board
+
+-- TODO Return a new board with the complete result of a given move
+move :: Board -> Tile -> (Int,Int) -> Board
+move board tile (x,y) =
+  let flippable = findFlippable board x y tile
+  in setTile tile x y board
+
+-- Deside whose turn it is
+-- TODO Check a given board and who made the last turn, then inspect the board to decide who makes the next move
+turn :: Board -> Player -> Player
+turn _ Player1 = Player2
+turn _ Player2 = Player1
 
 
 --
@@ -105,16 +126,18 @@ parseMove (x : y : _) = (((ord $ toLower x) - (ord 'a')), (digitToInt y) - 1)
 run gameState = do
   printBoard (board gameState)
   case gameState of
-    (GameOver board) -> putStrLn "Game over: PlayerX wins" -- TODO finn vinnern
+    (GameOver board) -> putStrLn "Game over: PlayerX wins" -- TODO find the winner
     (Continue board player) ->
       do
-        putStrLn "PlayerX's turn"
+        putStrLn $ (show player) ++ "'s turn"
         putStr "Make a move: "
         hFlush stdout
         input <- getLine
-        let move = parseMove $ input
-        print $ fst move
-        print $ snd move
-        putStrLn $ ">" ++ (show move) ++ "<"
+        let nextMove = parseMove $ input
+        -- TODO evaluate if move is legal (unoccupied squre etc)
+        let playerColor = color player
+        let nextBoard = move board playerColor nextMove
+        let nextPlayer = turn nextBoard player
+        run (Continue nextBoard nextPlayer)
   
 main = run (Continue initialBoard Player1)
