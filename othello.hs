@@ -5,13 +5,24 @@ import Othello.Logic
 import Data.Char
 import Data.List
 import System.IO (hFlush, stdout, getLine)
+import Control.Monad (zipWithM)
 
 display Black = " ◼︎ "
 display White = " ☐ "
-display Empty = " ⋅ "
+display Empty = " · "
 
-printRow row = putStr $ row ++ "\n"
-printBoard board = mapM printRow $ map (concatMap display) (slice 8 (tiles board))
+printRow row n = putStr $ (show n) ++ " " ++ row ++ "\n"
+
+printBoard board =
+  let n = size board
+      rows = slice n (tiles board)
+      rowStrings = map (concatMap display) rows
+  in do
+    putStrLn $ "   " ++ ([1..n]
+                         |> map (64 +)
+                         |> map (\x -> [chr x])
+                         |> intercalate "  ")
+    zipWithM printRow rowStrings [1..]
 
 parseMove :: String -> (Int, Int)
 parseMove (x : y : _) = (((ord $ toLower x) - (ord 'a')), (digitToInt y) - 1)
@@ -32,8 +43,8 @@ run gameState = do
         let nextMove = parseMove $ input
         -- TODO evaluate if move is legal (unoccupied squre etc)
         let nextBoard = move board playerColor nextMove
-        -- TODO decide next game state based on nextBoard
         let nextPlayer = turn nextBoard player
+        -- TODO decide next game state based on nextBoard
         let nextState = Continue nextBoard nextPlayer
         run nextState
   
