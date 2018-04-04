@@ -38,7 +38,7 @@ findRuns board pos =
 
 findFlippable :: Board -> (Int, Int) -> Tile -> Board
 findFlippable board pos tile =
-  let flippableCoords = (\run ->
+  let flippableCoords = (\run -> -- TODO naming; a "run" of coordinates in one direction leading away from the given point
                           let tiles = map (tileAt board) run
                               opposites = tiles
                                           |> takeWhile (isOpposite tile)
@@ -48,33 +48,39 @@ findFlippable board pos tile =
                                      |> takeWhile (== tile)
                                      |> length
                           in
-                            if same > 0
+                            if opposites > 0 && same > 0
                             then run |> take opposites
                             else [])
-      addTile = (\board2 pos ->
+      addTile = (\newBoard pos ->
                   let tile2 = tileAt board pos
-                  in setTile tile2 pos board2)
+                  in setTile tile2 pos newBoard)
   in
     findRuns board pos
     |> concatMap flippableCoords
     |> foldl addTile emptyBoard
 
--- TODO
 legalMove :: Board -> Move -> Bool
-legalMove _ _ = True
+legalMove board (Move tile x y) =
+  if (tileAt board (x, y)) /= Empty
+    then False
+    else
+      let flippable = findFlippable board (x,y) tile
+      in any (Empty /=) (tiles flippable)
 
-
-move :: Board -> Tile -> (Int,Int) -> Board
-move board tile pos =
-  findFlippable board pos tile
-  |> tiles
-  |> map flipTile
-  |> zipWith fill (tiles board)
-  |> Board (size board)
-  |> setTile tile pos
+move :: Board -> Move -> Board
+move board (Move tile x y) =
+  let pos = (x, y)
+  in
+    findFlippable board pos tile
+    |> tiles
+    |> map flipTile
+    |> zipWith fill (tiles board)
+    |> Board (size board)
+    |> setTile tile pos
 
 -- Deside whose turn it is
 -- TODO Check a given board and who made the last turn, then inspect the board to decide who makes the next move
+-- (filter board for empty tiles that have legal moves)
 turn :: Board -> Player -> Player
 turn _ Player1 = Player2
 turn _ Player2 = Player1

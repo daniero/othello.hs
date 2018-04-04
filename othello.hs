@@ -31,21 +31,29 @@ run gameState = do
   putStr $ replicate 100 '\n' -- clear screen
   printBoard (board gameState)
   putStrLn ""
+
   case gameState of
     (GameOver board) -> putStrLn "Game over: PlayerX wins" -- TODO find the winner
     (Continue board player) ->
       do
         let playerColor = color player
+
         putStrLn $ (show player) ++ " (" ++ (display playerColor) ++ ")"
-        putStr $ "Make a move : "
+        putStr "Make a move : "
         hFlush stdout
         input <- getLine
-        let nextMove = parseMove $ input
-        -- TODO evaluate if move is legal (unoccupied squre etc)
-        let nextBoard = move board playerColor nextMove
-        let nextPlayer = turn nextBoard player
-        -- TODO decide next game state based on nextBoard
-        let nextState = Continue nextBoard nextPlayer
-        run nextState
+
+        let (x,y) = parseMove $ input
+        let nextMove = (Move playerColor x y)
+        let legal = legalMove board nextMove
+
+        if not legal
+          then run gameState
+          else do
+            let nextBoard = move board nextMove
+            let nextPlayer = turn nextBoard player
+            -- TODO decide next game state based on nextBoard
+            let nextState = Continue nextBoard nextPlayer
+            run nextState
   
 main = run (Continue initialBoard Player1)
