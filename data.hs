@@ -20,9 +20,13 @@ data Player = Player1
             | Player2
             deriving (Eq, Show)
 
+opposite Player1 = Player2
+opposite Player2 = Player1
+
 color :: Player -> Tile
 color Player1 = Black
 color Player2 = White
+
 
 data GameState = GameOver { board :: Board }
                | Continue { board :: Board, nextPlayer :: Player }

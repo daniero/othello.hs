@@ -45,15 +45,15 @@ run gameState = do
 
         let (x,y) = parseMove $ input
         let nextMove = (Move playerColor x y)
-        let legal = legalMove board nextMove
+        let legal = isLegalMove board nextMove
 
         if not legal
           then run gameState
           else do
             let nextBoard = move board nextMove
-            let nextPlayer = turn nextBoard player
-            -- TODO decide next game state based on nextBoard
-            let nextState = Continue nextBoard nextPlayer
+            let nextState = case findNextPlayer nextBoard player of
+                              Just nextPlayer -> Continue nextBoard nextPlayer
+                              Nothing -> GameOver nextBoard
             run nextState
-  
+
 main = run (Continue initialBoard Player1)

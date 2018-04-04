@@ -59,8 +59,8 @@ findFlippable board pos tile =
     |> concatMap flippableCoords
     |> foldl addTile emptyBoard
 
-legalMove :: Board -> Move -> Bool
-legalMove board (Move tile x y) =
+isLegalMove :: Board -> Move -> Bool
+isLegalMove board (Move tile x y) =
   if (tileAt board (x, y)) /= Empty
     then False
     else
@@ -78,13 +78,25 @@ move board (Move tile x y) =
     |> Board (size board)
     |> setTile tile pos
 
--- Deside whose turn it is
--- TODO Check a given board and who made the last turn, then inspect the board to decide who makes the next move
--- (filter board for empty tiles that have legal moves)
-turn :: Board -> Player -> Player
-turn _ Player1 = Player2
-turn _ Player2 = Player1
 
+findAllCoordinates :: Board -> [(Int, Int)]
+findAllCoordinates (Board n _) = [(x,y) | x <- [0..n-1], y <- [0..n-1]]
+
+canMove :: Board -> Player -> Bool
+canMove board player =
+  let playerColor = color player
+      coord2move = uncurry (Move playerColor)
+  in
+      board
+      |> findAllCoordinates
+      |> map coord2move
+      |> any (isLegalMove board)
+
+findNextPlayer :: Board -> Player -> Maybe Player
+findNextPlayer board previousPlayer =
+  if canMove board (opposite previousPlayer) then Just (opposite previousPlayer)
+  else if canMove board previousPlayer then Just previousPlayer
+  else Nothing
 
 --
 -- Constants
