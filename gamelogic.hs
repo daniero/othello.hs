@@ -102,7 +102,8 @@ findNextPlayer board previousPlayer =
 -- Constants
 --
 
-emptyBoard = (Board 8 (replicate 64 Empty))
+boardSize = 8
+emptyBoard = (Board boardSize (replicate (boardSize*boardSize) Empty))
 
 initialBoard = emptyBoard
                |> setTile White (3, 3)
