@@ -67,16 +67,16 @@ isLegalMove board (Move tile x y) =
       let flippable = findFlippable board (x,y) tile
       in any (Empty /=) (tiles flippable)
 
-move :: Board -> Move -> Board
-move board (Move tile x y) =
-  let pos = (x, y)
+makeMove :: Board -> Move -> Board
+makeMove board (Move tile x y) =
+  let position = (x, y)
   in
-    findFlippable board pos tile
+    findFlippable board position tile
     |> tiles
     |> map flipTile
     |> zipWith fill (tiles board)
     |> Board (size board)
-    |> setTile tile pos
+    |> setTile tile position
 
 
 findAllCoordinates :: Board -> [(Int, Int)]

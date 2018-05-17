@@ -11,14 +11,14 @@ display Black = " ◼︎ "
 display White = " ☐ "
 display Empty = " · "
 
-printRow row n = putStr $ (show n) ++ " " ++ row ++ "\n"
+printRow row rowNum = putStr $ (show rowNum) ++ " " ++ row ++ "\n"
 
 printBoard board =
-  let n = size board
-      rows = slice n (tiles board)
+  let numRows = size board
+      rows = slice numRows (tiles board)
       rowStrings = map (concatMap display) rows
   in do
-    putStrLn $ "   " ++ ([1..n]
+    putStrLn $ "   " ++ ([1..numRows]
                          |> map (64 +)
                          |> map (\x -> [chr x])
                          |> intercalate "  ")
@@ -45,12 +45,12 @@ run gameState = do
 
         let (x,y) = parseMove $ input
         let nextMove = (Move playerColor x y)
-        let legal = isLegalMove board nextMove
+        let legalMove = isLegalMove board nextMove
 
-        if not legal
+        if not legalMove
           then run gameState
           else do
-            let nextBoard = move board nextMove
+            let nextBoard = makeMove board nextMove
             let nextState = case findNextPlayer nextBoard player of
                               Just nextPlayer -> Continue nextBoard nextPlayer
                               Nothing -> GameOver nextBoard
