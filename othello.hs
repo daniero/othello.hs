@@ -27,18 +27,30 @@ printBoard board =
 parseMove :: String -> (Int, Int)
 parseMove (x : y : _) = (((ord $ toLower x) - (ord 'a')), (digitToInt y) - 1)
 
+showPlayer :: Player -> String
+showPlayer player =
+  let playerColor = display $ color player
+      number = case player of
+                 Player1 -> "1"
+                 Player2 -> "2"
+  in "Player " ++ number ++ " (" ++ playerColor ++ ")"
+
+
 run gameState = do
   putStr $ replicate 100 '\n' -- clear screen
   printBoard (board gameState)
   putStrLn ""
 
   case gameState of
-    (GameOver board) -> putStrLn "Game over: PlayerX wins" -- TODO find the winner
+    (GameOver board) ->
+      case (winner board) of
+        Nothing -> putStrLn "It's a tie!"
+        Just player -> putStrLn $ "Game over: " ++ (showPlayer player)  ++ " wins!"
     (Continue board player) ->
       do
         let playerColor = color player
 
-        putStrLn $ (show player) ++ " (" ++ (display playerColor) ++ ")"
+        putStrLn $ (showPlayer player)
         putStr "Make a move : "
         hFlush stdout
         input <- getLine

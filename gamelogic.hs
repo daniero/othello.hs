@@ -1,4 +1,5 @@
 module Othello.Logic where
+import Data.List
 import Othello.Data
 import Utils
 
@@ -80,7 +81,7 @@ makeMove board (Move tile x y) =
 
 
 findAllCoordinates :: Board -> [(Int, Int)]
-findAllCoordinates (Board n _) = [(x,y) | x <- [0..n-1], y <- [0..n-1]]
+findAllCoordinates (Board size _) = [(x,y) | x <- [0..size-1], y <- [0..size-1]]
 
 canMove :: Board -> Player -> Bool
 canMove board player =
@@ -97,6 +98,15 @@ findNextPlayer board previousPlayer =
   if canMove board (opposite previousPlayer) then Just (opposite previousPlayer)
   else if canMove board previousPlayer then Just previousPlayer
   else Nothing
+
+winner :: Board -> Maybe Player
+winner board =
+  let player1 = length $ filter (== (color Player1)) (tiles board)
+      player2 = length $ filter (== (color Player2)) (tiles board)
+  in
+    if player1 > player2 then Just(Player1)
+    else if player2 > player1 then Just(Player2)
+    else Nothing
 
 --
 -- Constants
